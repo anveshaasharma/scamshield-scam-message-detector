@@ -1,0 +1,421 @@
+/* =====================================================================
+   ScamShield: style.css
+   ---------------------------------------------------------------------
+   Sections:
+     1. Theme colours (CSS variables) for dark + light mode
+     2. Base / reset
+     3. Layout helpers
+     4. Header & navigation
+     5. Hero
+     6. Cards, buttons, form
+     7. Results (meter, badge, flags, highlights)
+     8. How it works / scam types / report sections
+     9. Footer
+    10. Animations
+    11. Responsive tweaks
+   ===================================================================== */
+
+/* ---------- 1. THEME COLOURS ----------
+   Every colour lives in a variable. Switching theme just swaps these values
+   (script.js sets data-theme="dark" or "light" on the <html> tag). */
+:root,
+[data-theme="dark"] {
+  --bg: #060d1f;
+  --bg-glow-1: rgba(34, 211, 238, 0.14);
+  --bg-glow-2: rgba(59, 130, 246, 0.16);
+  --surface: #0d1a38;
+  --surface-2: #14244d;
+  --border: rgba(148, 174, 255, 0.16);
+  --text: #e8eeff;
+  --muted: #9aaad0;
+  --accent: #22d3ee;
+  --accent-2: #3b82f6;
+  --accent-text: #04121f;     /* text colour on top of accent buttons */
+  --shadow: 0 10px 40px rgba(0, 0, 0, 0.35);
+  --header-bg: rgba(6, 13, 31, 0.78);
+
+  --low: #22c55e;
+  --med: #f59e0b;
+  --high: #ef4444;
+  --mark-high-bg: rgba(239, 68, 68, 0.28);
+  --mark-high-line: #f87171;
+  --mark-med-bg: rgba(245, 158, 11, 0.26);
+  --mark-med-line: #fbbf24;
+}
+
+[data-theme="light"] {
+  --bg: #eef3ff;
+  --bg-glow-1: rgba(14, 165, 233, 0.14);
+  --bg-glow-2: rgba(59, 130, 246, 0.12);
+  --surface: #ffffff;
+  --surface-2: #f1f5ff;
+  --border: rgba(30, 58, 138, 0.14);
+  --text: #0b1736;
+  --muted: #51608a;
+  --accent: #0369a1;
+  --accent-2: #2563eb;
+  --accent-text: #ffffff;
+  --shadow: 0 10px 30px rgba(30, 58, 138, 0.12);
+  --header-bg: rgba(238, 243, 255, 0.85);
+
+  --low: #15803d;
+  --med: #c2610c;
+  --high: #dc2626;
+  --mark-high-bg: rgba(220, 38, 38, 0.16);
+  --mark-high-line: #dc2626;
+  --mark-med-bg: rgba(217, 119, 6, 0.18);
+  --mark-med-line: #d97706;
+}
+
+/* ---------- 2. BASE / RESET ---------- */
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; scroll-padding-top: 76px; }
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  line-height: 1.6;
+  color: var(--text);
+  background-color: var(--bg);
+  /* Soft glowing blobs + a faint "cyber" grid behind everything */
+  background-image:
+    radial-gradient(900px 500px at 10% -5%, var(--bg-glow-1), transparent 60%),
+    radial-gradient(800px 500px at 95% 5%, var(--bg-glow-2), transparent 60%),
+    linear-gradient(var(--border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size: auto, auto, 48px 48px, 48px 48px;
+  background-attachment: fixed;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+/* Make the HTML "hidden" attribute always win, even on elements with display:grid/flex */
+[hidden] { display: none !important; }
+
+h1, h2, h3 { line-height: 1.2; margin: 0 0 0.5em; }
+p { margin: 0 0 1em; }
+a { color: var(--accent); }
+code {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  padding: 1px 6px;
+  border-radius: 6px;
+  font-size: 0.9em;
+}
+kbd {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  padding: 0 5px;
+  font-size: 0.8em;
+}
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
+
+.muted { color: var(--muted); }
+.small { font-size: 0.85rem; }
+.c-low { color: var(--low); }
+.c-med { color: var(--med); }
+.c-high { color: var(--high); }
+
+/* Skip link for keyboard users (hidden until focused) */
+.skip-link {
+  position: absolute; left: -999px; top: 8px;
+  background: var(--accent); color: var(--accent-text);
+  padding: 8px 14px; border-radius: 8px; z-index: 100;
+}
+.skip-link:focus { left: 8px; }
+
+/* ---------- 3. LAYOUT HELPERS ---------- */
+.container { width: min(1100px, 100% - 32px); margin-inline: auto; }
+.section { padding: 56px 0; }
+.section-title { font-size: clamp(1.6rem, 3.5vw, 2.2rem); text-align: center; }
+.section-sub { text-align: center; color: var(--muted); max-width: 640px; margin: 0 auto 32px; }
+
+/* ---------- 4. HEADER & NAVIGATION ---------- */
+.site-header {
+  position: sticky; top: 0; z-index: 50;
+  background: var(--header-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+}
+.header-inner { display: flex; align-items: center; justify-content: space-between; gap: 16px; height: 64px; }
+
+.brand { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text); font-weight: 800; font-size: 1.25rem; }
+.brand-icon { width: 32px; height: 32px; color: var(--accent); filter: drop-shadow(0 0 8px var(--accent)); }
+.brand-name span { color: var(--accent); }
+
+.main-nav { display: flex; gap: 6px; }
+.main-nav a {
+  color: var(--muted); text-decoration: none; font-weight: 600; font-size: 0.95rem;
+  padding: 8px 12px; border-radius: 10px; transition: background 0.2s, color 0.2s;
+}
+.main-nav a:hover { color: var(--text); background: var(--surface-2); }
+
+.header-actions { display: flex; gap: 8px; }
+.icon-btn {
+  width: 42px; height: 42px; border-radius: 12px; cursor: pointer;
+  border: 1px solid var(--border); background: var(--surface); color: var(--text);
+  font-size: 1.1rem; display: grid; place-items: center;
+  transition: transform 0.2s, background 0.2s;
+}
+.icon-btn:hover { transform: translateY(-2px); background: var(--surface-2); }
+.menu-btn { display: none; }
+
+/* ---------- 5. HERO ---------- */
+.hero { padding: 64px 0 24px; text-align: center; }
+.eyebrow {
+  display: inline-block; margin-bottom: 16px; padding: 6px 14px; border-radius: 999px;
+  background: var(--surface); border: 1px solid var(--border); color: var(--muted);
+  font-size: 0.88rem; font-weight: 600;
+}
+.hero h1 { font-size: clamp(2rem, 6vw, 3.4rem); letter-spacing: -0.02em; }
+.gradient-text {
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.hero-sub { max-width: 640px; margin: 0 auto 20px; color: var(--muted); font-size: 1.08rem; }
+.privacy-pill {
+  display: inline-block; max-width: 640px; margin: 0; padding: 10px 18px; border-radius: 14px;
+  background: color-mix(in srgb, var(--low) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--low) 40%, transparent);
+  font-size: 0.93rem;
+}
+
+/* ---------- 6. CARDS, BUTTONS, FORM ---------- */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: var(--shadow);
+}
+.card h3 { font-size: 1.15rem; }
+.card-title { font-size: 1.5rem; margin-bottom: 18px; }
+
+.field-label { display: block; font-weight: 700; margin-bottom: 8px; }
+textarea {
+  width: 100%; min-height: 180px; resize: vertical;
+  padding: 16px; border-radius: 14px; font: inherit; font-size: 1rem; line-height: 1.55;
+  color: var(--text); background: var(--surface-2);
+  border: 1px solid var(--border);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+textarea::placeholder { color: var(--muted); opacity: 0.75; }
+textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 25%, transparent); }
+
+.input-meta { display: flex; justify-content: space-between; gap: 12px; margin: 8px 0 16px; font-size: 0.85rem; }
+.input-error { color: var(--high); font-weight: 600; }
+
+.btn-row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 12px 22px; border-radius: 12px; font: inherit; font-weight: 700; cursor: pointer;
+  text-decoration: none; border: 1px solid transparent;
+  transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+}
+.btn:hover { transform: translateY(-2px); }
+.btn:active { transform: translateY(0); }
+.btn-primary {
+  color: var(--accent-text);
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  box-shadow: 0 6px 22px color-mix(in srgb, var(--accent) 35%, transparent);
+}
+.btn-ghost { background: transparent; color: var(--text); border-color: var(--border); }
+.btn-ghost:hover { background: var(--surface-2); }
+.btn-icon { width: 20px; height: 20px; }
+.hint { font-size: 0.82rem; margin-left: auto; }
+
+/* Example buttons */
+.examples { margin-top: 28px; padding-top: 22px; border-top: 1px dashed var(--border); }
+.examples h3 { margin-bottom: 4px; }
+.chip-row { display: flex; flex-wrap: wrap; gap: 10px; }
+.chip {
+  padding: 9px 16px; border-radius: 999px; font: inherit; font-weight: 600; font-size: 0.92rem; cursor: pointer;
+  color: var(--text); background: var(--surface-2); border: 1px solid var(--border);
+  transition: transform 0.2s, border-color 0.2s, background 0.2s;
+}
+.chip:hover { transform: translateY(-2px); border-color: var(--accent); }
+
+/* ---------- 7. RESULTS ---------- */
+.results { margin-top: 28px; display: grid; gap: 20px; animation: fadeUp 0.5s ease both; }
+
+/* Score card */
+.score-card { display: flex; align-items: center; gap: 28px; }
+.meter { position: relative; width: 150px; height: 150px; flex: none; }
+.meter-svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.meter-track, .meter-fill { fill: none; stroke-width: 11; }
+.meter-track { stroke: var(--surface-2); }
+.meter-fill {
+  stroke: var(--risk-color, var(--low));
+  stroke-linecap: round;
+  stroke-dasharray: 326.73;          /* circumference = 2 * π * r  (r = 52) */
+  stroke-dashoffset: 326.73;         /* 326.73 = empty ring; JS lowers this to fill it */
+  transition: stroke-dashoffset 1.2s cubic-bezier(0.22, 1, 0.36, 1), stroke 0.4s;
+  filter: drop-shadow(0 0 6px var(--risk-color, var(--low)));
+}
+.meter-text {
+  position: absolute; inset: 0; display: grid; place-content: center; text-align: center;
+  font-size: 2.6rem; font-weight: 800; color: var(--risk-color, var(--text)); line-height: 1;
+}
+.meter-text small { font-size: 1rem; font-weight: 700; }
+.meter-text { display: flex; align-items: center; justify-content: center; }
+.meter-text small { align-self: center; margin-top: 8px; margin-left: 2px; }
+
+.score-info { flex: 1; min-width: 0; }
+.score-info h2 { font-size: 1.6rem; margin: 8px 0; }
+.score-info p { margin-bottom: 14px; }
+
+.badge {
+  display: inline-block; padding: 5px 14px; border-radius: 999px; font-weight: 800; font-size: 0.85rem;
+  letter-spacing: 0.04em; text-transform: uppercase; color: #fff; background: var(--risk-color, var(--low));
+}
+.bar { height: 10px; border-radius: 999px; background: var(--surface-2); overflow: hidden; }
+.bar-fill {
+  height: 100%; width: 0; border-radius: inherit; background: var(--risk-color, var(--low));
+  transition: width 1.2s cubic-bezier(0.22, 1, 0.36, 1), background 0.4s;
+}
+
+/* Risk level colour themes: JS adds one of these classes to #results */
+.level-safe, .level-low { --risk-color: var(--low); }
+.level-medium { --risk-color: var(--med); }
+.level-high { --risk-color: var(--high); }
+.level-high .score-card { border-color: color-mix(in srgb, var(--high) 55%, transparent); }
+.level-medium .score-card { border-color: color-mix(in srgb, var(--med) 55%, transparent); }
+.level-safe .score-card, .level-low .score-card { border-color: color-mix(in srgb, var(--low) 55%, transparent); }
+
+/* Safe card */
+.safe-card { border-color: color-mix(in srgb, var(--low) 50%, transparent); }
+
+.results-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+
+/* Highlighted message box */
+.message-box {
+  background: var(--surface-2); border: 1px solid var(--border); border-radius: 14px;
+  padding: 16px; white-space: pre-wrap; word-break: break-word; overflow-wrap: anywhere;
+  max-height: 340px; overflow: auto;
+}
+mark {
+  color: inherit; padding: 1px 3px; border-radius: 5px; cursor: help;
+  border-bottom: 2px solid var(--mark-med-line); background: var(--mark-med-bg);
+}
+mark.mark-high { border-bottom-color: var(--mark-high-line); background: var(--mark-high-bg); }
+.legend { margin: 12px 0 0; font-size: 0.82rem; display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; }
+.mark-sample { padding: 1px 8px; border-radius: 5px; color: var(--text); }
+.mark-sample.mark-high { background: var(--mark-high-bg); border-bottom: 2px solid var(--mark-high-line); }
+.mark-sample.mark-med { background: var(--mark-med-bg); border-bottom: 2px solid var(--mark-med-line); }
+
+/* Red-flag list */
+.flag-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.flag-item {
+  display: grid; grid-template-columns: auto 1fr; gap: 12px; padding: 14px;
+  background: var(--surface-2); border: 1px solid var(--border);
+  border-left: 4px solid var(--med); border-radius: 12px;
+  animation: fadeUp 0.4s ease both;
+}
+.flag-item.sev-high { border-left-color: var(--high); }
+.flag-icon { font-size: 1.5rem; line-height: 1.2; }
+.flag-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.flag-title { font-weight: 800; }
+.flag-points { font-size: 0.78rem; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: var(--surface); border: 1px solid var(--border); color: var(--muted); }
+.flag-why { margin: 4px 0 6px; color: var(--muted); font-size: 0.95rem; }
+.flag-found { font-size: 0.82rem; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.found-chip {
+  background: var(--mark-med-bg); border-radius: 6px; padding: 1px 7px; font-family: ui-monospace, Consolas, monospace;
+  max-width: 100%; overflow-wrap: anywhere;
+}
+.sev-high .found-chip { background: var(--mark-high-bg); }
+
+/* Tick lists (advice, safe card, evidence) */
+.check-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.check-list li { position: relative; padding-left: 30px; }
+.check-list li::before { content: "✔"; position: absolute; left: 0; top: 0; color: var(--accent); font-weight: 800; }
+.check-list.two-col { grid-template-columns: 1fr 1fr; }
+.advice-card { border-color: color-mix(in srgb, var(--accent) 40%, transparent); }
+.advice-cta { margin: 18px 0 0; padding: 12px 16px; border-radius: 12px; background: var(--surface-2); }
+.disclaimer { text-align: center; color: var(--muted); font-size: 0.88rem; margin: 0; }
+
+/* ---------- 8. HOW IT WORKS / SCAM TYPES / REPORT ---------- */
+.steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-bottom: 24px; }
+.step { text-align: center; }
+.step-num {
+  display: inline-grid; place-items: center; width: 42px; height: 42px; margin-bottom: 10px; border-radius: 50%;
+  font-weight: 800; color: var(--accent-text); background: linear-gradient(135deg, var(--accent), var(--accent-2));
+}
+.step p { color: var(--muted); font-size: 0.95rem; margin: 0; }
+
+.rules-list { list-style: none; padding: 0; margin: 16px 0; display: flex; flex-wrap: wrap; gap: 10px; }
+.rules-list li {
+  display: inline-flex; gap: 8px; align-items: center; padding: 7px 14px; border-radius: 999px; font-size: 0.9rem;
+  background: var(--surface-2); border: 1px solid var(--border);
+}
+.rules-list .pts { color: var(--accent); font-weight: 800; }
+
+.grid-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; }
+.type-card { transition: transform 0.25s, border-color 0.25s; }
+.type-card:hover, .report-card:hover { transform: translateY(-5px); border-color: var(--accent); }
+.type-card p, .report-card p { color: var(--muted); font-size: 0.95rem; margin: 0; }
+.type-icon { font-size: 2rem; margin-bottom: 8px; }
+
+.report-grid { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); margin-bottom: 20px; }
+.report-card { display: flex; flex-direction: column; gap: 10px; transition: transform 0.25s, border-color 0.25s; }
+.report-card .btn { margin-top: auto; align-self: flex-start; }
+.report-main { border-color: color-mix(in srgb, var(--high) 50%, transparent); }
+.big-number {
+  font-size: 3.2rem; font-weight: 900; letter-spacing: 0.04em; text-decoration: none; line-height: 1; color: var(--high);
+}
+
+/* ---------- 9. FOOTER ---------- */
+.site-footer { margin-top: 40px; padding: 32px 0; border-top: 1px solid var(--border); background: var(--header-bg); }
+.footer-inner { display: flex; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
+.footer-text { max-width: 520px; margin: 10px 0 0; }
+
+/* ---------- 10. ANIMATIONS ---------- */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Scroll-reveal: only active when JS adds the .js class to <html>,
+   so the page is still fully readable if JavaScript is off. */
+.js .reveal { opacity: 0; transform: translateY(18px); transition: opacity 0.6s ease, transform 0.6s ease; }
+.js .reveal.visible { opacity: 1; transform: none; }
+
+/* Respect people who prefer less motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+}
+
+/* ---------- 11. RESPONSIVE ---------- */
+@media (max-width: 860px) {
+  .steps { grid-template-columns: 1fr 1fr; }
+  .results-grid { grid-template-columns: 1fr; }
+  .check-list.two-col { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 700px) {
+  .menu-btn { display: grid; }
+  /* On phones the nav becomes a dropdown panel under the header */
+  .main-nav {
+    position: absolute; top: 64px; left: 0; right: 0; flex-direction: column; padding: 10px 16px 16px;
+    background: var(--surface); border-bottom: 1px solid var(--border); box-shadow: var(--shadow);
+    display: none;
+  }
+  .main-nav.open { display: flex; }
+  .main-nav a { padding: 12px; }
+
+  .hero { padding-top: 40px; }
+  .section { padding: 40px 0; }
+  .card { padding: 18px; border-radius: 16px; }
+  .score-card { flex-direction: column; text-align: center; }
+  .hint { margin-left: 0; width: 100%; }
+  .btn-row .btn { flex: 1 1 auto; }
+  .flag-head { flex-direction: column; gap: 4px; }
+}
+
+@media (max-width: 480px) {
+  .steps { grid-template-columns: 1fr; }
+}

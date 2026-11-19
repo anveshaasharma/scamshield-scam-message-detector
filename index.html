@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ScamShield: Scam Message Detector</title>
+  <meta name="description" content="Paste a suspicious SMS or WhatsApp message and ScamShield tells you how likely it is to be a scam, and why. Built for scams common in India. 100% private: runs in your browser." />
+  <meta name="theme-color" content="#060d1f" />
+  <!-- Favicon as an inline SVG so we don't need an extra image file -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%2322d3ee' d='M12 2 4 5v6c0 5 3.4 9.4 8 11 4.6-1.6 8-6 8-11V5l-8-3z'/%3E%3Cpath fill='none' stroke='%23060d1f' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round' d='m8.5 12 2.4 2.4 4.6-4.8'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Reusable shield icon. Use it anywhere with: <svg><use href="#icon-shield"/></svg> -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="icon-shield" viewBox="0 0 24 24">
+      <path d="M12 2 4 5v6c0 5 3.4 9.4 8 11 4.6-1.6 8-6 8-11V5l-8-3z" fill="currentColor" opacity=".18"/>
+      <path d="M12 2 4 5v6c0 5 3.4 9.4 8 11 4.6-1.6 8-6 8-11V5l-8-3z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+      <path d="m8.5 12 2.4 2.4 4.6-4.8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+  </svg>
+
+  <a class="skip-link" href="#detector">Skip to the detector</a>
+
+  <!-- ===================== HEADER ===================== -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="#top" aria-label="ScamShield home">
+        <svg class="brand-icon" aria-hidden="true"><use href="#icon-shield"/></svg>
+        <span class="brand-name">Scam<span>Shield</span></span>
+      </a>
+
+      <nav class="main-nav" id="mainNav" aria-label="Main navigation">
+        <a href="#detector">Detector</a>
+        <a href="#how-it-works">How it works</a>
+        <a href="#scam-types">Scam types</a>
+        <a href="#report">Report a scam</a>
+      </nav>
+
+      <div class="header-actions">
+        <!-- Dark / light mode toggle (logic is in script.js) -->
+        <button id="themeToggle" class="icon-btn" type="button" aria-label="Switch to light mode" title="Toggle dark / light mode">
+          <span class="theme-icon" aria-hidden="true">☀️</span>
+        </button>
+        <!-- Hamburger menu, only visible on small screens -->
+        <button id="menuToggle" class="icon-btn menu-btn" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="mainNav">
+          <span aria-hidden="true">☰</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="top">
+
+    <!-- ===================== HERO ===================== -->
+    <section class="hero">
+      <div class="container hero-inner">
+        <p class="eyebrow">🇮🇳 Built for scams common in India</p>
+        <h1>Got a suspicious message?<br /><span class="gradient-text">Check it before you click.</span></h1>
+        <p class="hero-sub">
+          Paste any SMS or WhatsApp message below. ScamShield scans it for the tricks scammers use,
+          shows a risk score, and explains every red flag in simple language.
+        </p>
+        <p class="privacy-pill">
+          🔒 <strong>100% private.</strong> Everything runs inside your browser. Your message is never stored or sent anywhere.
+        </p>
+      </div>
+    </section>
+
+    <!-- ===================== DETECTOR ===================== -->
+    <section id="detector" class="section detector-section">
+      <div class="container">
+        <div class="card detector-card reveal">
+          <h2 class="card-title">🔍 Scam Message Detector</h2>
+
+          <label for="messageInput" class="field-label">Paste the suspicious message here</label>
+          <textarea id="messageInput" rows="8" maxlength="5000"
+            placeholder="Example: Dear customer, your SBI KYC has expired. Update immediately at http://sbi-kyc-update.xyz or your account will be blocked..."></textarea>
+
+          <div class="input-meta">
+            <span id="charCount" class="muted">0 / 5000 characters</span>
+            <span id="inputError" class="input-error" role="alert"></span>
+          </div>
+
+          <div class="btn-row">
+            <button id="analyzeBtn" class="btn btn-primary" type="button">
+              <svg class="btn-icon" aria-hidden="true"><use href="#icon-shield"/></svg>
+              Analyze Message
+            </button>
+            <button id="clearBtn" class="btn btn-ghost" type="button">Clear</button>
+            <span class="muted hint">Tip: press <kbd>Ctrl</kbd> + <kbd>Enter</kbd> to analyze</span>
+          </div>
+
+          <!-- ---------- Try an example (filled in by script.js from the EXAMPLES array) ---------- -->
+          <div class="examples">
+            <h3>Try an example</h3>
+            <p class="muted">Click one to fill the box, then press “Analyze Message”.</p>
+            <div id="exampleButtons" class="chip-row"></div>
+          </div>
+        </div>
+
+        <!-- ---------- RESULTS (hidden until the user analyzes a message) ---------- -->
+        <div id="results" class="results" hidden aria-live="polite">
+
+          <!-- Score card: ring meter + badge + one-line summary -->
+          <div class="card score-card" id="scoreCard">
+            <div class="meter" aria-hidden="true">
+              <svg viewBox="0 0 120 120" class="meter-svg">
+                <circle class="meter-track" cx="60" cy="60" r="52"></circle>
+                <circle class="meter-fill" id="meterFill" cx="60" cy="60" r="52"></circle>
+              </svg>
+              <div class="meter-text">
+                <span id="riskPercent">0</span><small>%</small>
+              </div>
+            </div>
+            <div class="score-info">
+              <span id="riskBadge" class="badge">Risk</span>
+              <h2 id="riskHeadline">Result</h2>
+              <p id="riskSummary" class="muted"></p>
+              <div class="bar" role="progressbar" aria-label="Risk score" aria-valuemin="0" aria-valuemax="100" id="riskBar">
+                <div class="bar-fill" id="barFill"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Shown ONLY when no red flags are found -->
+          <div class="card safe-card" id="safeCard" hidden>
+            <h3>✅ Is this safe? No red flags found</h3>
+            <p>
+              We didn't spot any of the common scam patterns in this message. That's a good sign,
+              but <strong>no tool is 100% accurate</strong>. Scammers keep inventing new tricks.
+            </p>
+            <ul class="check-list">
+              <li>If you don't know the sender, be careful even with a “clean” message.</li>
+              <li>Never share OTP, PIN, CVV or passwords with anyone, no matter who they claim to be.</li>
+              <li>When in doubt, call your bank or the company using the number on their official website or your card.</li>
+            </ul>
+          </div>
+
+          <div class="results-grid" id="detailsGrid">
+            <!-- Highlighted message -->
+            <div class="card">
+              <h3>🖍️ Your message, with suspicious parts highlighted</h3>
+              <div id="highlightedMessage" class="message-box" tabindex="0"></div>
+              <p class="legend muted">
+                <span class="mark-sample mark-high">strong red flag</span>
+                <span class="mark-sample mark-med">warning sign</span>
+                Hover or tap a highlight to see why.
+              </p>
+            </div>
+
+            <!-- Why suspicious -->
+            <div class="card" id="flagsCard">
+              <h3>🚩 Why this looks suspicious</h3>
+              <ul id="flagList" class="flag-list"></ul>
+            </div>
+          </div>
+
+          <!-- What you should do -->
+          <div class="card advice-card" id="adviceCard">
+            <h3>🛡️ What you should do</h3>
+            <ul id="adviceList" class="check-list"></ul>
+            <p class="advice-cta">
+              Lost money or shared details? Call <a href="tel:1930"><strong>1930</strong></a> right away or report at
+              <a href="https://cybercrime.gov.in" target="_blank" rel="noopener noreferrer">cybercrime.gov.in</a>.
+            </p>
+          </div>
+
+          <p class="disclaimer">
+            ⚠️ ScamShield uses simple rules, not magic. It can miss new scams and can sometimes flag genuine messages.
+            Use it as a helper, not as the final word.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== HOW IT WORKS ===================== -->
+    <section id="how-it-works" class="section">
+      <div class="container">
+        <h2 class="section-title reveal">How it works</h2>
+        <p class="section-sub reveal">No AI black box. Just clear rules that anyone can read, understand and improve.</p>
+
+        <div class="steps">
+          <div class="card step reveal">
+            <span class="step-num">1</span>
+            <h3>Paste</h3>
+            <p>You paste the SMS or WhatsApp message into the box. It never leaves your device.</p>
+          </div>
+          <div class="card step reveal">
+            <span class="step-num">2</span>
+            <h3>Scan</h3>
+            <p>A list of detection rules (patterns) is checked against the text, such as urgency words, OTP requests and fake links.</p>
+          </div>
+          <div class="card step reveal">
+            <span class="step-num">3</span>
+            <h3>Score</h3>
+            <p>Every rule has a point value. The points of all the red flags found are added up and turned into a 0–100% risk score.</p>
+          </div>
+          <div class="card step reveal">
+            <span class="step-num">4</span>
+            <h3>Explain</h3>
+            <p>You get the risk level, the exact words highlighted, a simple reason for each flag, and what to do next.</p>
+          </div>
+        </div>
+
+        <div class="card reveal rules-card">
+          <h3>📋 What ScamShield checks</h3>
+          <p class="muted">This list is generated live from the <code>RULES</code> array in <code>script.js</code>. Add a rule there and it shows up here automatically.</p>
+          <ul id="rulesList" class="rules-list"></ul>
+          <p class="muted small">
+            Score guide: <strong class="c-low">0–29% Low</strong> · <strong class="c-med">30–59% Medium</strong> · <strong class="c-high">60–100% High</strong>
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== COMMON SCAM TYPES ===================== -->
+    <section id="scam-types" class="section">
+      <div class="container">
+        <h2 class="section-title reveal">Common scam types in India</h2>
+        <p class="section-sub reveal">Learn the pattern once and you'll spot it everywhere.</p>
+
+        <div class="grid-cards">
+          <article class="card type-card reveal">
+            <div class="type-icon">🏦</div>
+            <h3>Fake KYC / bank alert</h3>
+            <p>“Your KYC has expired, update now or the account will be blocked.” The link leads to a copy of your bank's site that steals your login and OTP.</p>
+          </article>
+          <article class="card type-card reveal">
+            <div class="type-icon">🎁</div>
+            <h3>Lottery, prize &amp; cashback</h3>
+            <p>“You have won ₹25 lakh in a lucky draw!” You're asked to pay a “tax” or “processing fee” to claim a prize that doesn't exist.</p>
+          </article>
+          <article class="card type-card reveal">
+            <div class="type-icon">💡</div>
+            <h3>Electricity bill threat</h3>
+            <p>“Power will be disconnected tonight because last month's bill is unpaid. Call this number.” The “officer” then makes you install a remote app.</p>
+          </article>
+          <article class="card type-card reveal">
+            <div class="type-icon">💼</div>
+            <h3>Fake job / work-from-home</h3>
+            <p>“Earn ₹5,000 daily by liking videos.” After a few small payouts, you're asked for a registration fee or a big “investment”, and then they vanish.</p>
+          </article>
+          <article class="card type-card reveal">
+            <div class="type-icon">📦</div>
+            <h3>Courier &amp; customs</h3>
+            <p>“Your parcel is held, pay ₹25 to reschedule delivery.” Or a fake “customs/police” call claiming drugs were found in a parcel in your name.</p>
+          </article>
+          <article class="card type-card reveal">
+            <div class="type-icon">🖥️</div>
+            <h3>Remote-access apps</h3>
+            <p>Scammers ask you to install AnyDesk, TeamViewer or an unknown APK “to fix a problem”. This lets them see your screen, OTPs and banking apps.</p>
+          </article>
+          <article class="card type-card reveal">
+            <div class="type-icon">📲</div>
+            <h3>UPI collect &amp; QR tricks</h3>
+            <p>“Scan this QR to receive money.” You never need to enter your UPI PIN or scan a QR to <em>receive</em> money. A PIN is only for sending.</p>
+          </article>
+          <article class="card type-card reveal">
+            <div class="type-icon">🏛️</div>
+            <h3>Government impersonation</h3>
+            <p>Messages pretending to be TRAI, Income Tax, RBI, Aadhaar/UIDAI or police, threatening SIM blocking, fines or arrest unless you pay or call.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== REPORT A SCAM ===================== -->
+    <section id="report" class="section">
+      <div class="container">
+        <h2 class="section-title reveal">Report a scam (India)</h2>
+        <p class="section-sub reveal">If you lost money, <strong>speed matters</strong>. Report within the first few hours, since it gives the best chance of the payment being frozen.</p>
+
+        <div class="grid-cards report-grid">
+          <article class="card report-card report-main reveal">
+            <div class="type-icon">📞</div>
+            <h3>National Cyber Crime Helpline</h3>
+            <a class="big-number" href="tel:1930">1930</a>
+            <p>Call immediately if money was taken from your account or card. Keep your transaction ID and bank details ready.</p>
+          </article>
+          <article class="card report-card reveal">
+            <div class="type-icon">🌐</div>
+            <h3>cybercrime.gov.in</h3>
+            <p>The official National Cyber Crime Reporting Portal. File a complaint online for any cyber fraud or harassment.</p>
+            <a class="btn btn-primary" href="https://cybercrime.gov.in" target="_blank" rel="noopener noreferrer">Open the portal ↗</a>
+          </article>
+          <article class="card report-card reveal">
+            <div class="type-icon">📵</div>
+            <h3>Sanchar Saathi (Chakshu)</h3>
+            <p>Report suspicious calls, SMS and WhatsApp messages to the Department of Telecommunications.</p>
+            <a class="btn btn-ghost" href="https://sancharsaathi.gov.in" target="_blank" rel="noopener noreferrer">Open Sanchar Saathi ↗</a>
+          </article>
+        </div>
+
+        <div class="card reveal evidence-card">
+          <h3>🧾 Keep this as evidence</h3>
+          <ul class="check-list two-col">
+            <li>Screenshots of the message, the sender's number and any links</li>
+            <li>Transaction IDs, UTR numbers and the time of payment</li>
+            <li>Call logs and the phone numbers or UPI IDs used by the scammer</li>
+            <li>Immediately call your bank to block your card or account if you shared any details</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===================== FOOTER ===================== -->
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div>
+        <a class="brand" href="#top" aria-label="Back to top">
+          <svg class="brand-icon" aria-hidden="true"><use href="#icon-shield"/></svg>
+          <span class="brand-name">Scam<span>Shield</span></span>
+        </a>
+        <p class="muted small footer-text">
+          🔒 Privacy: all analysis happens locally in your browser. No message is stored, logged or sent to any server.
+        </p>
+      </div>
+      <p class="muted small footer-text">
+        ScamShield is an educational project. It is not affiliated with any bank or government body and cannot guarantee that a message is safe or fake.
+        Helpline: <a href="tel:1930">1930</a> · <a href="https://cybercrime.gov.in" target="_blank" rel="noopener noreferrer">cybercrime.gov.in</a>
+      </p>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
